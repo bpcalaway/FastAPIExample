@@ -5,7 +5,7 @@ from models import SongChoice, ClaimedArea, User, GPSPoint
 app = FastAPI()
 
 # We're not attaching a db yet, so this just lives in memory while the app runs.  Any restart empties it out
-areas = []
+areas = list()
 
 
 @app.get("/")

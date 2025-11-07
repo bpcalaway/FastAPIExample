@@ -1,6 +1,11 @@
 from datetime import datetime
 from pydantic import BaseModel, Field
 
+# 'Interesting' hack to utilize storing class models in a set
+class HashableBaseModel(BaseModel):
+    def __hash__(self):
+        return hash((type(self),) + tuple(self.__dict__.values()))
+
 class User(BaseModel):
     name: str
     join: datetime
@@ -14,7 +19,7 @@ class SongChoice(BaseModel):
     spotifyId: int # This will be the lookup for pulling data with the spotify API
 
 
-class GPSPoint(BaseModel):
+class GPSPoint(HashableBaseModel):
     latitude: int
     longitude: int
 
