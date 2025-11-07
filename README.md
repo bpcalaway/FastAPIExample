@@ -8,4 +8,4 @@ A lot of this won't be covered in the API such as:
 - Any kind of UI work for deciding which song you want
 - Specifics for the map
 
-In order to start this you'll need python 3.13 and pip. Then run 'pip install fastapi' and 'pip install "fastapi[standard]"'.  After that, you can run it locally with 'fastapi dev app.py' and check the endpoints on localhost:8000/docs
+In order to start this you'll need python 3.12, pip, and pipenv. Then run 'pipenv shell'.  After that, you can run it locally with 'fastapi dev app.py' and check the endpoints on localhost:8000/docs
