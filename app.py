@@ -17,7 +17,7 @@ async def root():
 async def list_areas():
     print(areas)
     # Currently broken, it relies on having "hashable" data types, points and polygons are not
-    return {"areas": areas}
+    return {"areas": areas[0].to_csv()}
 
 @app.get("/claimedArea/search")
 async def find_area(location: GPSPoint):
@@ -36,11 +36,11 @@ async def claim_area(area: ClaimedArea):
 async def load_sample_files():
     # TODO remove this, it's for local testing and loads a bunch of my nonsense files
     files = [
-        "/home/bpcalaway/FastAPIExample/gps_utils/dev_data/mg_cycling_park.geojson",
-        "/home/bpcalaway/FastAPIExample/gps_utils/dev_data/devils_lake_hike.geojson",
-        "/home/bpcalaway/FastAPIExample/gps_utils/dev_data/east_loi_brady_home.geojson",
-        "/home/bpcalaway/FastAPIExample/gps_utils/dev_data/michigan_north_shore.geojson",
-        "/home/bpcalaway/FastAPIExample/gps_utils/dev_data/msp_light_overlap.geojson"
+        #"/home/bpcalaway/FastAPIExample/gps_utils/dev_data/mg_cycling_park.geojson",
+        #"/home/bpcalaway/FastAPIExample/gps_utils/dev_data/devils_lake_hike.geojson",
+        #"/home/bpcalaway/FastAPIExample/gps_utils/dev_data/east_loi_brady_home.geojson",
+        #"/home/bpcalaway/FastAPIExample/gps_utils/dev_data/michigan_north_shore.geojson",
+        "gps_utils/dev_data/msp_light_overlap.geojson"
     ]
     for file in files:
         gdf = transform_area_to_gdf(file)
