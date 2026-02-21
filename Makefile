@@ -11,3 +11,5 @@ db-down:
 local:
 	pipenv install
 	pipenv run uvicorn app:app --host 0.0.0.0 --port 8001 --reload
+
+# TODO we'll need a job to load up and sync the db, there'll be a script for that eventually

@@ -1,4 +1,4 @@
-from models import ClaimedArea, GPSPoint
+from models import Turf
 import geopandas
 from geodatasets import get_path
 

@@ -9,6 +9,8 @@ pandas = "*"
 gpsd = "*"
 geopandas = "*"
 geodatasets = "*"
+sqlalchemy = "*"
+psycopg2-binary = "*"
 
 [dev-packages]
 

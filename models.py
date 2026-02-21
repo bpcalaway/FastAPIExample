@@ -1,37 +1,28 @@
 from datetime import datetime
-from pydantic import BaseModel, Field
+from sqlalchemy import String, Boolean, ForeignKey
+from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
 # 'Interesting' hack to utilize storing class models in a set
-class HashableBaseModel(BaseModel):
-    def __hash__(self):
-        return hash((type(self),) + tuple(self.__dict__.values()))
+class Base(DeclarativeBase):
+    __tablename__ = None
 
-class User(BaseModel):
-    name: str
-    join: datetime
-    active: bool
+    def create(self):
+        pass
 
-class SongChoice(BaseModel):
-    # We're just assuming spotify for now
-    title: str
-    artist: str
-    album: str
-    spotifyId: int # This will be the lookup for pulling data with the spotify API
+class User(Base):
+    __tablename__ = "user"
 
+    id: Mapped[int] = mapped_column(primary_key=True)
+    name: Mapped[str] = mapped_column(String(50), unique=True)
+    # join: datetime Too much work lol
+    is_active: Mapped[bool] = mapped_column(Boolean, default=True)
 
-class GPSPoint(HashableBaseModel):
-    latitude: int
-    longitude: int
-
-class ClaimedArea(BaseModel):
+# Need to update this too
+class Turf(Base):
+    __tablename__ = "turf"
     # Defined set of GPSPoint objects, use this to define the area specifically
-    vertices: set[GPSPoint]
+    id: Mapped[int] = mapped_column(primary_key=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("user.id"))
 
-    # The following are used to set a roughly rectangular area for a fast/possibly inaccurate lookup
-    #northBound: GPSPoint
-    #southBound: GPSPoint
-    #westBound: GPSPoint
-    #eastBound: GPSPoint
-
-    claimedBy: User
-    claimedSong: SongChoice
+    #vertices: set[GPSPoint]
+    #claimedSong: SongChoice
