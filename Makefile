@@ -1,6 +1,7 @@
 install:
 	apt-get update
-	apt-get install python3.12 pipenv podman-compose
+	apt-get install python3.12 pipenv
+	pip install podman-compose
 
 db:
 	podman-compose up -d
