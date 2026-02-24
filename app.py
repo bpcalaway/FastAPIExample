@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from sqlalchemy import create_engine, select
 from sqlalchemy.orm import Session
+from sqlmodel import SQLModel
 from datetime import datetime
 from models import Turf, User
 from gps_utils.area import transform_area_to_gdf
@@ -8,8 +9,11 @@ from gps_utils.area import transform_area_to_gdf
 app = FastAPI()
 sql_engine = create_engine("postgresql+psycopg2://postgres:postgres@0.0.0.0:5432/killgen_db")
 # We're not attaching a db yet, so this just lives in memory while the app runs.  Any restart empties it out
-areas = list()
 
+# Create the tables after starting the app, we probably don't want to do this every time
+@app.on_event("startup")
+def build_tables():
+    SQLModel.metadata.create_all(sql_engine)
 
 @app.get("/")
 async def root():
@@ -17,7 +21,8 @@ async def root():
 
 @app.get("/User")
 async def get_users():
-    session = Session(sql_engine)
+    #session = Session(sql_engine)
+
     return User
 
 @app.post("/User")

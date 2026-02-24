@@ -8,6 +8,7 @@ name = "pypi"
 
 [packages]
 fastapi = {extras = ["standard"], version = "*"}
+sqlmodel = "*"
 pandas = "*"
 gpsd = "*"
 geopandas = "*"
