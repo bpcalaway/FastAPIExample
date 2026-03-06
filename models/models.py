@@ -14,15 +14,14 @@ class User(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column(String(50), unique=True)
-    # join: datetime Too much work lol
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
+
+    def __repr__(self):
+        return f"{self.id}-{self.name}-{self.is_active}"
 
 # Need to update this too
 class Turf(Base):
     __tablename__ = "turf"
-    # Defined set of GPSPoint objects, use this to define the area specifically
+
     id: Mapped[int] = mapped_column(primary_key=True)
     user_id: Mapped[int] = mapped_column(ForeignKey("user.id"))
-
-    #vertices: set[GPSPoint]
-    #claimedSong: SongChoice

@@ -1,4 +1,4 @@
-from models import Turf
+from models.models import Turf
 import geopandas
 from geodatasets import get_path
 
