@@ -1,9 +1,10 @@
 from datetime import datetime
 from sqlalchemy import String, Boolean, ForeignKey
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
+from sqlalchemy_serializer import SerializerMixin
 
 # 'Interesting' hack to utilize storing class models in a set
-class Base(DeclarativeBase):
+class Base(DeclarativeBase, SerializerMixin):
     __tablename__ = None
 
     def create(self):
