@@ -12,8 +12,14 @@ async def get_users(id=None, name=None, is_active=True):
     Returns 1 or many users depending on search criteria, default to only active users
     """
     #session = Session(sql_engine)
+    conditions = [User.is_active == is_active]
+    if id:
+        conditions.append((User.id == id))
+    if name:
+        conditions.append((User.name == name))
+
     with sql_engine.connect() as conn:
-        users = conn.execute(select(User))
+        users = conn.execute(select(User).filter(*conditions))
 
     return [dict(r._mapping) for r in users]
 

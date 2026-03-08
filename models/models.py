@@ -1,5 +1,5 @@
 from datetime import datetime
-from sqlalchemy import String, Boolean, ForeignKey
+from sqlalchemy import String, Boolean, DateTime, ForeignKey
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 from sqlalchemy_serializer import SerializerMixin
 
@@ -15,6 +15,7 @@ class User(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column(String(50), unique=True)
+    joined: Mapped[datetime] = mapped_column(DateTime, default=datetime.now())
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
 
     def __repr__(self):
