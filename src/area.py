@@ -15,19 +15,13 @@ def transform_area_to_gdf(uploaded_filename):
     print(gdf)
     gdf.set_index("name")
     gdf.set_crs(crs="EPSG:6933", allow_override=True)
-    #gdf = gdf.to_crs("epsg:32633")
-   # gdf = gdf["geometry"].concave_hull()
 
     gdf['polygon'] = [Polygon(mapping(x)['coordinates']) for x in gdf.geometry]
 
-    #gdf["polygon"] = gdf.geometry.polygonize()
-    #gdf["polygon"] = gdf.polygon.simplify_coverage(tolerance=10000)
-    #gdf["polygon"] = gdf.geometry.concave_hull()[0]
     gdf["interiors"] = gdf.interiors
     gdf["area_sqkm"] = gdf.area / 10e6 # I don't believe this number at all
     gdf["centroid"] = gdf.centroid # When mapping this it looks like shit, I also don't believe it
     
-    #gdf = gdf.rename_geometry("WKT")
     gdf = gdf.drop("geometry", axis=1)
     gdf.to_file("src/dev_data/east_loi_brady_home_transform.geojson", driver="GeoJSON", index=False)
     print(gdf.columns.to_list())
