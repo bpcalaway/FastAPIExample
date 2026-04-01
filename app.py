@@ -1,6 +1,4 @@
 from fastapi import FastAPI
-from sqlalchemy.orm import Session
-from datetime import datetime
 from src.admin import router as admin_router
 from src.turf import router as turf_router
 from src.user import router as user_router

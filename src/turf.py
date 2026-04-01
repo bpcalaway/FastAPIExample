@@ -1,6 +1,7 @@
 from fastapi import APIRouter
 from models.models import Turf
 from schemas.schemas import TurfSchema
+from src.area import transform_area_to_gdf
 
 router = APIRouter(prefix="/Turf", tags=["Turf"])
 
@@ -20,3 +21,16 @@ async def claim_turf():
     # TODO once you have the locations derive the bounds and get info from the authenticated user
     #new_area = Turf(verts=vertices, user=current_user, song=song)
     Turf.create(turf)
+
+@router.post("/transform_turf")
+async def transform_turf():
+    """
+    Test endpoint to load a file from dev_data and try to transform it
+    """
+    test_data = "src/dev_data/activity_22341944376.geojson"
+    gdf = transform_area_to_gdf(test_data)
+
+    #gdf.to_file("src/dev_data/east_loi_brady_home_transform.geojson", driver="GeoJSON", index=False)
+
+    return {"message": "hello"} #str(gdf.polygon[0])}
+
