@@ -23,7 +23,7 @@ def transform_area_to_gdf(uploaded_filename):
     gdf["centroid"] = gdf.centroid # When mapping this it looks like shit, I also don't believe it
     
     gdf = gdf.drop("geometry", axis=1)
-    gdf.to_file("src/dev_data/east_loi_brady_home_transform.geojson", driver="GeoJSON", index=False)
+    gdf.to_file("src/transform_data/mpls_transform_4_huge.geojson", driver="GeoJSON", index=False)
     print(gdf.columns.to_list())
     print(gdf)
     #gdf.geometry =  gdf['GEOMETRY'].apply(loads)
