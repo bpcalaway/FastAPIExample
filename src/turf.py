@@ -28,7 +28,7 @@ async def transform_turf():
     """
     Test endpoint to load a file from dev_data and try to transform it
     """
-    test_data = "src/dev_data/east_loi_brady_home.geojson"
+    test_data = "src/dev_data/east_bms.geojson"
     gdf = transform_area_to_gdf(test_data)
 
     return {"message": "hello"} #str(gdf.polygon[0])}
