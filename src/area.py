@@ -2,7 +2,7 @@ from models.models import Turf
 import geopandas
 import topojson as tp
 from geodatasets import get_path
-from shapely import affinity, simplify, force_2d, buffer
+from shapely import affinity, simplify, force_2d, buffer, intersection
 from shapely.geometry import Polygon, mapping
 from shapely.wkt import loads
 from datetime import datetime
@@ -56,7 +56,7 @@ def transform_area_to_gdf(uploaded_filename):
     
     # You need to drop the original geometry column for mysterious reasons
     gdf = gdf.drop("geometry", axis=1)
-    gdf.to_file("src/transform_data/mpls_transform_3_large_simple.geojson", driver="GeoJSON", index=False)
+    gdf.to_file("src/transform_data/mpls_transform_1_simple.geojson", driver="GeoJSON", index=False)
 
     return gdf
 
@@ -66,6 +66,7 @@ def intersect(gdf_1: geopandas.geodataframe, gdf_2: geopandas.geodataframe):
     For now, we're hardcoding two and not bothering to decay it.  In short, there's a lot TODO
     """
 
-    
+    inter = intersection(gdf_1.geometry, gdf_2.geometry)
+    print(inter)
 
     return None
