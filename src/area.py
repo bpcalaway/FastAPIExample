@@ -56,7 +56,7 @@ def transform_area_to_gdf(uploaded_filename):
     
     # You need to drop the original geometry column for mysterious reasons
     gdf = gdf.drop("geometry", axis=1)
-    gdf.to_file("src/transform_data/mpls_transform_5_simple.geojson", driver="GeoJSON", index=False)
+    gdf.to_file("src/transform_data/mpls_transform_6_simple.geojson", driver="GeoJSON", index=False)
 
     return gdf
 
