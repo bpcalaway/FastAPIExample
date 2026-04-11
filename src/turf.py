@@ -2,7 +2,7 @@ from fastapi import APIRouter
 from models.models import Turf
 from schemas.schemas import TurfSchema
 import geopandas
-from src.area import transform_area_to_gdf, scale_polygon, intersect
+from src.area import transform_area_to_gdf, scale_polygon, intersect, intersect_complex
 
 router = APIRouter(prefix="/Turf", tags=["Turf"])
 
@@ -53,8 +53,21 @@ async def find_simple_intersection():
     """
 
     gdf_1 = geopandas.read_file("src/transform_data/mpls_transform_3_large_simple.geojson", driver="GeoJSON")
-    gdf_2 = geopandas.read_file("src/transform_data/mpls_transform_1_simple.geojson", driver="GeoJSON")
+    gdf_2 = geopandas.read_file("src/transform_data/mpls_transform_6_simple.geojson", driver="GeoJSON")
 
-    intersect(gdf_1, gdf_2)
+    inter = intersect(gdf_1, gdf_2)
+    return {"message": "done"}
+
+@router.post("/find_complex_single_intersection")
+async def find_complex_single_intersection():
+    """
+    Test endpoint, Works the same as above but a little more complex in that it relies on using the
+    intersection of old and new, but also defining the inner scaled polygon as out of bounds for the new
+    polygon.  Basically it's the intersection of both - the intersection of the inner polygon
+    """
+    gdf_1 = geopandas.read_file("src/transform_data/mpls_transform_3_large_simple.geojson", driver="GeoJSON")
+    gdf_2 = geopandas.read_file("src/transform_data/mpls_transform_6_simple.geojson", driver="GeoJSON")
+
+    itsverysimpletomeactually = intersect_complex(gdf_1, gdf_2)
 
     return {"message": "done"}

@@ -2,7 +2,7 @@ from models.models import Turf
 import geopandas
 import topojson as tp
 from geodatasets import get_path
-from shapely import affinity, simplify, force_2d, buffer, intersection
+from shapely import affinity, force_2d, buffer, intersection, difference
 from shapely.geometry import Polygon, mapping
 from shapely.wkt import loads
 from datetime import datetime
@@ -19,17 +19,19 @@ def scale_polygon(gdf: geopandas.geodataframe, capture_time = datetime):
        This will return a scaled polygon, rather than a full db entry or geojson file, eventually.  This is in the test phase
     """
     scale = determine_scale(capture_time)
-    print(f"geo: {gdf.geometry.dtype}, poly: {gdf.polygon.dtype}")
-    #pgon = gdf.iloc[0]["polygon"]
+
     pgon = geopandas.GeoSeries.from_wkt(gdf["polygon"])
     applied_polygon = buffer(pgon, distance=scale, join_style="bevel")
-    #scaled_polygon = affinity.scale(pgon, xfact = scale, yfact = scale)
+
+    return applied_polygon
 
     # Would normally just return this, but we're going to write it to a file
     fname = "src/transform_data/scaled_polygon.geojson"
-    gdf["geometry"] = applied_polygon
+    new_gdf = geopandas.GeoDataFrame(geometry=applied_polygon)
+    new_gdf['polygon'] = [Polygon(mapping(x)['coordinates']) for x in new_gdf.geometry]
     #gdf = gdf.drop("polygon", axis=1)
-    gdf.to_file(fname, driver="GeoJSON", index=False)
+    new_gdf = new_gdf.drop("geometry", axis=1)
+    new_gdf.to_file(fname, driver="GeoJSON", index=False)
 
 # Determine the actual size of the area in square mileage
 # TODO this is the hardest part.  Needs to not claim unclaimable (undecayed) area, and update the vertices so we don't overcompute.  this is probably awful
@@ -60,13 +62,43 @@ def transform_area_to_gdf(uploaded_filename):
 
     return gdf
 
-def intersect(gdf_1: geopandas.geodataframe, gdf_2: geopandas.geodataframe):
+def intersect(existing_gdf: geopandas.geodataframe, new_gdf: geopandas.geodataframe):
     """
     This will eventually get much more complex and involve the intersection of N gdfs, and of their partial decays
     For now, we're hardcoding two and not bothering to decay it.  In short, there's a lot TODO
     """
+    pgon1 = geopandas.GeoSeries.from_wkt(existing_gdf["polygon"])
+    pgon2 = geopandas.GeoSeries.from_wkt(new_gdf["polygon"])
 
-    inter = intersection(gdf_1.geometry, gdf_2.geometry)
-    print(inter)
+    inter = intersection(pgon1, pgon2)
+    new_gdf = geopandas.GeoDataFrame(geometry=inter)
+
+    # new_gdf["area_sqkm"] = new_gdf.area
+    # new_gdf.to_file("src/transform_data/inter_polygon.geojson", driver="GeoJSON", index=False)
+    print(new_gdf)
+
+    return new_gdf
+
+def intersect_complex(existing_gdf: geopandas.geodataframe, new_gdf: geopandas.geodataframe):
+    """
+    Slightly more complex than above, should really only take two args.  Endgame is to take all relevant
+    local polygons as an array and find a mix of conflicted areas instead of just the one, but we'll get there
+
+    returns intersection(existing, new) - intersection(inner, new)
+    """
+    pgon1 = geopandas.GeoSeries.from_wkt(existing_gdf["polygon"])
+    pgon2 = scale_polygon(existing_gdf, datetime.now())
+    pgon3 = geopandas.GeoSeries.from_wkt(new_gdf["polygon"])
+
+    all_combined = pgon3.intersection(pgon1)
+    inner_combined = pgon3.intersection(pgon2)
+
+    print(f"find the diff of {all_combined}")
+    print(f"and {inner_combined}")
+    
+    diff = all_combined.difference(inner_combined)
+    print(diff)
+    new_gdf = geopandas.GeoDataFrame(geometry=diff)
+    new_gdf.to_file("src/transform_data/inter_polygon_debug.geojson", driver="GeoJSON", index=False)
 
     return None
