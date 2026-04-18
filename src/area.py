@@ -33,12 +33,11 @@ def scale_polygon(gdf: geopandas.geodataframe, capture_time = datetime):
     new_gdf = new_gdf.drop("geometry", axis=1)
     new_gdf.to_file(fname, driver="GeoJSON", index=False)
 
-# Determine the actual size of the area in square mileage
-# TODO this is the hardest part.  Needs to not claim unclaimable (undecayed) area, and update the vertices so we don't overcompute.  this is probably awful
-# Return the total area and the updated vertices as an object
-def transform_area_to_gdf(uploaded_filename):
-    gdf = geopandas.read_file(filename=uploaded_filename, driver="GeoJSON", crs='EPSG:4326')
-    print(gdf)
+
+def create_turf_from_gdf(gdf: geopandas.geodataframe, user_id: int):
+    """
+    Create a row in the Turf table and sub entries in ContestedTurfs, from the /Turf post endpoint
+    """
     gdf.set_index("name")
     gdf.set_crs(crs="EPSG:6933", allow_override=True)
 
@@ -47,14 +46,28 @@ def transform_area_to_gdf(uploaded_filename):
     gdf["geometry"] = force_2d(gdf["geometry"])
     gdf['polygon'] = [Polygon(mapping(x)['coordinates']) for x in gdf.geometry]
 
-    # Simplify really wants this to be a simple triangle, so we're going to try another method using topojson
+     # Simplify really wants this to be a simple triangle, so we're going to try another method using topojson
     topo = tp.Topology(gdf, toposimplify=4)
     gdf = topo.to_gdf()
-    
 
-    gdf["interiors"] = gdf.interiors
-    gdf["area_sqkm"] = gdf.area / 10e6 # I don't believe this number at all
+    gdf.set_geometry(col="polygon", inplace=True)
     gdf["centroid"] = gdf.centroid
+
+    turf_dict = {
+        "user_id": user_id,
+        "polygon": str(gdf["polygon"][0]),
+        "centroid_lat": 0.0,
+        "centroid_long": 0.0,
+        "area_avg_radius": 0.0
+    }
+
+    return turf_dict
+
+# Determine the actual size of the area in square mileage
+# TODO this is the hardest part.  Needs to not claim unclaimable (undecayed) area, and update the vertices so we don't overcompute.  this is probably awful
+# Return the total area and the updated vertices as an object
+def transform_area_to_gdf(uploaded_filename):
+
     
     # You need to drop the original geometry column for mysterious reasons
     gdf = gdf.drop("geometry", axis=1)

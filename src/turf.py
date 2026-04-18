@@ -1,37 +1,48 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, UploadFile
 from models.models import Turf
 from schemas.schemas import TurfSchema
+from sqlalchemy import insert, select
 import geopandas
-from src.area import transform_area_to_gdf, scale_polygon, intersect, intersect_complex
+from src.area import scale_polygon, intersect, intersect_complex, create_turf_from_gdf
+from src.sql import sql_engine
 
 router = APIRouter(prefix="/Turf", tags=["Turf"])
 
-@router.get("/", response_model=TurfSchema)
-async def list_turfs():
+@router.get("/") #,response_model=TurfSchema)
+async def list_turfs(turf_id: int = None, user_id: int = None):
     """
-    Return a list of all turfs at this point
+    Returns a list of turfs based on search criteria, or all turfs if none provided
     """
-    # Currently broken, it relies on having "hashable" data types, points and polygons are not
-    return Turf
+    conditions = [Turf.protected == False]
+    if turf_id:
+        conditions.append((Turf.id == turf_id))
+    if user_id:
+        conditions.append((Turf.user_id == user_id))
+
+    with sql_engine.connect() as conn:
+        turfs = conn.execute(select(Turf).filter(*conditions))
+
+    return [dict(r._mapping) for r in turfs]
 
 @router.post("/")
-async def claim_turf():
+async def claim_turf(turf: UploadFile, user: int):
     """
-    Create a new turf entry, will need a gigantic json file at some point
+    Upload a geojson file and create a new entry in the Turf table.  We'll need to keep building this,
+    as it is one of our biggest pieces of functionality.  For now, pass it a geojson and a user ID, then
+    figure out everything else in the area.py file
+    #TODO also create the contested regions while doing this.
     """
-    # TODO once you have the locations derive the bounds and get info from the authenticated user
-    #new_area = Turf(verts=vertices, user=current_user, song=song)
-    Turf.create(turf)
+    # Only accept valid title geojson files
+    if turf.filename[-8:] != ".geojson":
+        return {"error": "File not detected as being valid geojson, please check your file upload"}
 
-@router.post("/transform_turf")
-async def transform_turf():
-    """
-    Test endpoint to load a file from dev_data and try to transform it
-    """
-    test_data = "src/dev_data/north_loi.geojson"
-    gdf = transform_area_to_gdf(test_data)
+    gdf = geopandas.read_file(turf.file, driver="GeoJSON", crs='EPSG:4326')
+    turf_dict = create_turf_from_gdf(gdf, user)
+    with sql_engine.connect() as conn:
+        turf_row = conn.execute(insert(Turf).values(**turf_dict))
+        conn.commit()
 
-    return {"message": "hello"} #str(gdf.polygon[0])}
+    return {"message": "Successfully uploaded turf"}
 
 @router.post("/scale_turf")
 async def scale_turf():

@@ -1,5 +1,5 @@
 from datetime import datetime
-from sqlalchemy import String, Boolean, DateTime, ForeignKey
+from sqlalchemy import String, Boolean, DateTime, ForeignKey, Text, Float
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 from sqlalchemy_serializer import SerializerMixin
 
@@ -27,3 +27,27 @@ class Turf(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     user_id: Mapped[int] = mapped_column(ForeignKey("user.id"))
+    upload_date: Mapped[datetime] = mapped_column(DateTime, default=datetime.now())
+    polygon: Mapped[str] = mapped_column(Text) #Will use to_wkt and from_wkt for shapely conversion
+
+    # Store these separately for lookup purposes
+    centroid_lat: Mapped[float] = mapped_column(Float)
+    centroid_long: Mapped[float] = mapped_column(Float)
+    area_sqkm: Mapped[float] = mapped_column(Float, nullable=True) # Not sure we need this, ignore for now
+    area_avg_radius: Mapped[float] = mapped_column(Float)
+
+    last_boosted: Mapped[datetime] = mapped_column(DateTime, nullable=True)
+    protected: Mapped[bool] = mapped_column(Boolean, default=False)
+
+
+# In theory this should only need to be mapped once, on initial polygon capture, and one way to the captured
+# polygon.  We may need to shift this in the future, but we'll do the naive approach for now
+class ContestedTurfs(Base):
+    __tablename__ = "contested_turfs"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    captured_turf: Mapped[int] = mapped_column(ForeignKey(Turf.id))
+    contesting_turf: Mapped[int] = mapped_column(ForeignKey(Turf.id)) #Cascade do work when this value is removed
+    #Once the contest ends add this to their parent object and delete the record
+    sub_polygon:  Mapped[str] = mapped_column(Text)
+
