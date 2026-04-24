@@ -33,7 +33,7 @@ class Turf(Base):
     # Store these separately for lookup purposes
     centroid_lat: Mapped[float] = mapped_column(Float)
     centroid_long: Mapped[float] = mapped_column(Float)
-    area_sqkm: Mapped[float] = mapped_column(Float, nullable=True) # Not sure we need this, ignore for now
+    area_sqkm: Mapped[float] = mapped_column(Float) # Not sure we need this, ignore for now
     area_avg_radius: Mapped[float] = mapped_column(Float)
 
     last_boosted: Mapped[datetime] = mapped_column(DateTime, nullable=True)

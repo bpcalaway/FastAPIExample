@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from src.admin import router as admin_router
+from routers.admin import router as admin_router
 from routers.turf import router as turf_router
 from routers.user import router as user_router
 
