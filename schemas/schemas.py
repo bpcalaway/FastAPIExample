@@ -12,3 +12,11 @@ class UserSchema(BaseModel):
 class TurfSchema(BaseModel):
     id: int
     user_id: int
+    upload_date: datetime
+    polygon: str
+    centroid_lat: float
+    centroid_long: float
+    area_sqkm: float
+    area_avg_radius: float
+    last_boosted: datetime
+    protected: bool
