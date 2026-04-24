@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from src.admin import router as admin_router
-from src.turf import router as turf_router
-from src.user import router as user_router
+from routers.turf import router as turf_router
+from routers.user import router as user_router
 
 
 app = FastAPI()

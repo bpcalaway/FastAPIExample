@@ -27,3 +27,4 @@ class Turf(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     user_id: Mapped[int] = mapped_column(ForeignKey("user.id"))
+    protected: Mapped[bool] = mapped_column(default=False)
