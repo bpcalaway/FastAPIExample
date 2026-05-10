@@ -1,17 +1,22 @@
-name: dockerpostgis
-
 services:
   db:
-    image: postgis/postgis
-    restart: always
-    ports: 
-      - "5432:5432"
+    container_name: postgres
+    image: docker.io/postgres:16-alpine
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
       PGDATA: /data/postgres
       POSTGRES_DB: killgen_db
     volumes:
-      - pg_data:/var/lib/postgresql/data
+      - db:/data/postgres
+    ports:
+      - "5432:5432"
+    networks:
+      - db
+    restart: unless-stopped
+networks:
+  db:
+    driver: bridge
+
 volumes:
-  pg_data:
+  db:
