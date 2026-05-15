@@ -45,15 +45,19 @@ async def claim_turf(turf: UploadFile, user: int):
     return {"message": "Successfully uploaded turf"}
 
 @router.post("/scale_turf")
-async def scale_turf():
+async def scale_turf(turf_id: int = None):
     """
     Test endpoint, will eventually not need an api call as it will be determined at capture time
     """
-    test_data = "src/transform_data/mpls_transform_3_large_simple.geojson"
-    gdf = geopandas.read_file(filename=test_data, driver="GeoJSON")
-    print(gdf)
-    scale_polygon(gdf)
+    sql = select(Turf).where(Turf.id == turf_id)
+    with sql_engine.connect() as conn:
+        selected_turf = conn.execute(sql)
 
+    #test_data = "src/transform_data/mpls_transform_3_large_simple.geojson"
+    #gdf = geopandas.read_file(filename=test_data, driver="GeoJSON")
+    #print(gdf)
+    print(selected_turf.fetchone())
+    scaled_pgon = scale_polygon(selected_turf.fetchone())
     return {"message": "done"}
 
 @router.post("/find_simple_intersection")

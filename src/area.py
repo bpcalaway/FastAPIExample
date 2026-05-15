@@ -14,13 +14,13 @@ def determine_scale(time: datetime):
     """
     return -0.002
 
-def scale_polygon(gdf: geopandas.geodataframe, capture_time = datetime):
+def scale_polygon(turf: Turf):
     """TODO This should take a polygon as an argument, which will likely be stored as a blob of some kind in the db,
        This will return a scaled polygon, rather than a full db entry or geojson file, eventually.  This is in the test phase
     """
-    scale = determine_scale(capture_time)
+    scale = determine_scale(turf.upload_date)
 
-    pgon = geopandas.GeoSeries.from_wkt(gdf["polygon"])
+    pgon = geopandas.GeoSeries.from_wkt(turf.polygon)
     applied_polygon = buffer(pgon, distance=scale, join_style="bevel")
 
     return applied_polygon
