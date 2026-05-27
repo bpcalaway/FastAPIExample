@@ -2,7 +2,7 @@ from models.models import Turf
 import geopandas
 import topojson as tp
 from geodatasets import get_path
-from shapely import affinity, force_2d, buffer, intersection, difference
+from shapely import affinity, force_2d, buffer, intersection, difference, minimum_bounding_radius, minimum_bounding_circle
 from shapely.geometry import Polygon, mapping
 from shapely.wkt import loads
 from datetime import datetime
@@ -46,7 +46,8 @@ def create_turf_from_gdf(gdf: geopandas.geodataframe, user_id: int):
     gdf["geometry"] = force_2d(gdf["geometry"])
     gdf['polygon'] = [Polygon(mapping(x)['coordinates']) for x in gdf.geometry]
 
-    area = gdf.polygon[0].area
+    area = minimum_bounding_circle(gdf.polygon[0]).area
+    mbr = minimum_bounding_radius(gdf.polygon[0])
 
      # Simplify really wants this to be a simple triangle, so we're going to try another method using topojson
     topo = tp.Topology(gdf, toposimplify=4)
@@ -61,7 +62,7 @@ def create_turf_from_gdf(gdf: geopandas.geodataframe, user_id: int):
         "centroid_lat": point.y,
         "centroid_long": point.x,
         "area_sqkm": area,
-        "area_avg_radius": 0.0 #TODO
+        "area_avg_radius": float(mbr)
     }
 
     return turf_dict
