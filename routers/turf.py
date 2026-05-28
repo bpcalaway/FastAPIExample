@@ -51,13 +51,11 @@ async def scale_turf(turf_id: int = None):
     """
     sql = select(Turf).where(Turf.id == turf_id)
     with sql_engine.connect() as conn:
-        selected_turf = conn.execute(sql)
+        selected_turf = conn.execute(sql).fetchone()
 
-    #test_data = "src/transform_data/mpls_transform_3_large_simple.geojson"
-    #gdf = geopandas.read_file(filename=test_data, driver="GeoJSON")
-    #print(gdf)
-    print(selected_turf.fetchone())
-    scaled_pgon = scale_polygon(selected_turf.fetchone())
+    turf = dict(selected_turf._mapping)
+    scaled_pgon = scale_polygon(turf)
+    print(scaled_pgon)
     return {"message": "done"}
 
 @router.post("/find_simple_intersection")

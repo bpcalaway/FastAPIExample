@@ -2,7 +2,7 @@ from models.models import Turf
 import geopandas
 import topojson as tp
 from geodatasets import get_path
-from shapely import affinity, force_2d, buffer, intersection, difference
+from shapely import affinity, force_2d, buffer, intersection, difference, from_wkt
 from shapely.geometry import Polygon, mapping
 from shapely.wkt import loads
 from datetime import datetime
@@ -14,24 +14,17 @@ def determine_scale(time: datetime):
     """
     return -0.002
 
-def scale_polygon(turf: Turf):
+def scale_polygon(turf: dict):
     """TODO This should take a polygon as an argument, which will likely be stored as a blob of some kind in the db,
        This will return a scaled polygon, rather than a full db entry or geojson file, eventually.  This is in the test phase
     """
-    scale = determine_scale(turf.upload_date)
+    scale = determine_scale(turf["upload_date"])
 
-    pgon = geopandas.GeoSeries.from_wkt(turf.polygon)
-    applied_polygon = buffer(pgon, distance=scale, join_style="bevel")
+    # Casts the DB's string polygon back to the Shapely Polygon binary type
+    pgon = from_wkt(turf["polygon"])
+    scaled_pgon = buffer(pgon, distance=scale, join_style="bevel")
 
-    return applied_polygon
-
-    # Would normally just return this, but we're going to write it to a file
-    fname = "src/transform_data/scaled_polygon.geojson"
-    new_gdf = geopandas.GeoDataFrame(geometry=applied_polygon)
-    new_gdf['polygon'] = [Polygon(mapping(x)['coordinates']) for x in new_gdf.geometry]
-    #gdf = gdf.drop("polygon", axis=1)
-    new_gdf = new_gdf.drop("geometry", axis=1)
-    new_gdf.to_file(fname, driver="GeoJSON", index=False)
+    return scaled_pgon
 
 
 def create_turf_from_gdf(gdf: geopandas.geodataframe, user_id: int):
