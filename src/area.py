@@ -2,7 +2,7 @@ from models.models import Turf
 import geopandas
 import topojson as tp
 from geodatasets import get_path
-from shapely import affinity, force_2d, buffer, intersection, difference, from_wkt
+from shapely import affinity, force_2d, buffer, intersection, difference, minimum_bounding_radius, minimum_bounding_circle
 from shapely.geometry import Polygon, mapping
 from shapely.wkt import loads
 from datetime import datetime
@@ -39,7 +39,8 @@ def create_turf_from_gdf(gdf: geopandas.geodataframe, user_id: int):
     gdf["geometry"] = force_2d(gdf["geometry"])
     gdf['polygon'] = [Polygon(mapping(x)['coordinates']) for x in gdf.geometry]
 
-    area = gdf.polygon[0].area
+    area = minimum_bounding_circle(gdf.polygon[0]).area
+    mbr = minimum_bounding_radius(gdf.polygon[0])
 
      # Simplify really wants this to be a simple triangle, so we're going to try another method using topojson
     topo = tp.Topology(gdf, toposimplify=4)
@@ -54,7 +55,7 @@ def create_turf_from_gdf(gdf: geopandas.geodataframe, user_id: int):
         "centroid_lat": point.y,
         "centroid_long": point.x,
         "area_sqkm": area,
-        "area_avg_radius": 0.0 #TODO
+        "area_avg_radius": float(mbr)
     }
 
     return turf_dict
@@ -99,4 +100,13 @@ def intersect_complex(existing_gdf: geopandas.geodataframe, new_gdf: geopandas.g
     new_gdf = geopandas.GeoDataFrame(geometry=diff)
     new_gdf.to_file("src/transform_data/inter_polygon_debug.geojson", driver="GeoJSON", index=False)
 
+    return None
+
+def cut_turf(new_gdf: int, possible_intersections: list[int]):
+    """
+    Takes a primary key for a new turf and a list of N pkeys for possible intersections.  Check for
+    the overlap of each one and find the complex intersection of all relevant objects
+
+    returns: a list of updated possible intersections that were edited
+    """
     return None

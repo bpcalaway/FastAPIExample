@@ -5,6 +5,7 @@ from sqlalchemy import insert, select
 import geopandas
 from src.area import scale_polygon, intersect, intersect_complex, create_turf_from_gdf
 from src.sql import sql_engine
+from src.db import get_turf_objects_from_db
 
 router = APIRouter(prefix="/Turf", tags=["Turf"])
 
@@ -43,6 +44,19 @@ async def claim_turf(turf: UploadFile, user: int):
         conn.commit()
 
     return {"message": "Successfully uploaded turf"}
+
+@router.get("/transformed_turf")
+async def get_transformed_turf(turf_id: int):
+    """
+    Gets the shape of a turf with all bite sized chunks taken out of it based on its scale at the current moment
+    Not every possible_intersections entry will be used, but the logic for finding these will be handled elsewhere
+    Will return a single polygon entry that should look like a disaster in most situations.
+    """
+    possible_intersections = [2, 3] # TODO write the function to find all nearby objects
+    #cut_turf(turf_id, possible_intersections())
+    print(get_turf_objects_from_db(primary_key=possible_intersections))
+    return {"message": "dumbass"}
+    
 
 @router.post("/scale_turf")
 async def scale_turf(turf_id: int = None):
