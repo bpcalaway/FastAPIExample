@@ -108,3 +108,12 @@ def intersect_complex(existing_gdf: geopandas.geodataframe, new_gdf: geopandas.g
     new_gdf.to_file("src/transform_data/inter_polygon_debug.geojson", driver="GeoJSON", index=False)
 
     return None
+
+def cut_turf(new_gdf: int, possible_intersections: list[int]):
+    """
+    Takes a primary key for a new turf and a list of N pkeys for possible intersections.  Check for
+    the overlap of each one and find the complex intersection of all relevant objects
+
+    returns: a list of updated possible intersections that were edited
+    """
+    return None
