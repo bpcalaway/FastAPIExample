@@ -70,6 +70,7 @@ async def scale_turf(turf_id: int = None):
     turf = turflist[0]
     scaled_pgon = scale_polygon(turf)
     print(scaled_pgon)
+    new_gdf.to_file("src/scaled_data/inter_polygon.geojson", driver="GeoJSON", index=False)
     return {"message": "done"}
 
 @router.post("/find_simple_intersection")
