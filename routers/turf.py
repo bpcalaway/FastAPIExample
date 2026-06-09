@@ -63,11 +63,11 @@ async def scale_turf(turf_id: int = None):
     """
     Test endpoint, will eventually not need an api call as it will be determined at capture time
     """
-    sql = select(Turf).where(Turf.id == turf_id)
-    with sql_engine.connect() as conn:
-        selected_turf = conn.execute(sql).fetchone()
+    #returns a list but id is unique so should only be one value
+    turflist = get_turf_objects_from_db(primary_key=turf_id)
 
-    turf = dict(selected_turf._mapping)
+    #get first value from turf list
+    turf = turflist[0]
     scaled_pgon = scale_polygon(turf)
     print(scaled_pgon)
     return {"message": "done"}

@@ -11,17 +11,9 @@ async def get_users(id=None, name=None, is_active=True):
     """
     Returns 1 or many users depending on search criteria, default to only active users
     """
-    #session = Session(sql_engine)
-    conditions = [User.is_active == is_active]
-    if id:
-        conditions.append((User.id == id))
-    if name:
-        conditions.append((User.name == name))
+        
+    return User.get(id=id, name=name, is_active=is_active)
 
-    with sql_engine.connect() as conn:
-        users = conn.execute(select(User).filter(*conditions))
-
-    return [dict(r._mapping) for r in users]
 
 @router.patch("/")
 async def patch_user(user: UserSchema):
@@ -35,7 +27,4 @@ async def post_user(username: str):
     """
     Should only be used for creating a new user, fail if name is already taken with message
     """
-    with sql_engine.connect() as conn:
-        user = conn.execute(insert(User).values(name=username))
-        conn.commit()
-    return user
+    User.create(username)

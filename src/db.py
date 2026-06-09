@@ -17,7 +17,7 @@ def _serialize_row_objects(db_results):
 
     return serialized_objects
 
-def get_turf_objects_from_db(primary_key: int | list[int]):
+def get_turf_objects_from_db(primary_key: int | list[int]) -> list:
     """
     Send either a primary key or a list of primary keys and return a list of Turf objects as
     dictionaries.  Each of these will be serialized for ease of use

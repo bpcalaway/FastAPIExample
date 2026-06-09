@@ -21,8 +21,11 @@ def scale_polygon(turf: dict):
     scale = determine_scale(turf["upload_date"])
 
     # Casts the DB's string polygon back to the Shapely Polygon binary type
-    pgon = from_wkt(turf["polygon"])
+    pgon = (turf["polygon"])
     scaled_pgon = buffer(pgon, distance=scale, join_style="bevel")
+
+    gdf = geopandas.GeoDataFrame(geometry=scaled_pgon)
+    gdf.to_file("src/scaled_data/inter_polygon.geojson", driver="GeoJSON", index=False)
 
     return scaled_pgon
 
