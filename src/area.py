@@ -24,7 +24,7 @@ def scale_polygon(turf: dict):
     pgon = (turf["polygon"])
     scaled_pgon = buffer(pgon, distance=scale, join_style="bevel")
 
-    gdf = geopandas.GeoDataFrame(geometry=scaled_pgon)
+    gdf = geopandas.GeoDataFrame(geometry=[scaled_pgon])
     gdf.to_file("src/scaled_data/inter_polygon.geojson", driver="GeoJSON", index=False)
 
     return scaled_pgon
