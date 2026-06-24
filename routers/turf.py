@@ -3,7 +3,7 @@ from models.models import Turf
 from schemas.schemas import TurfSchema
 from sqlalchemy import insert, select
 import geopandas
-from src.area import scale_polygon, intersect, intersect_complex, create_turf_from_gdf
+from src.area import scale_polygon, intersect, intersect_complex, create_turf_from_gdf, cut_turf
 from src.sql import sql_engine
 from src.db import get_turf_objects_from_db
 
@@ -52,9 +52,9 @@ async def get_transformed_turf(turf_id: int):
     Not every possible_intersections entry will be used, but the logic for finding these will be handled elsewhere
     Will return a single polygon entry that should look like a disaster in most situations.
     """
-    possible_intersections = [2, 3] # TODO write the function to find all nearby objects
-    #cut_turf(turf_id, possible_intersections())
-    print(get_turf_objects_from_db(primary_key=possible_intersections))
+    possible_intersections = [3] # TODO write the function to find all nearby objects
+    cut_turf(turf_id, possible_intersections)
+    #print(get_turf_objects_from_db(primary_key=possible_intersections))
     return {"message": "dumbass"}
     
 

@@ -22,7 +22,7 @@ class User(Base):
     joined: Mapped[datetime] = mapped_column(DateTime, default=datetime.now())
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
 
-    def create(self, username):
+    def create(username):
         with sql_engine.connect() as conn:
             user = conn.execute(insert(User).values(name=username))
             conn.commit()

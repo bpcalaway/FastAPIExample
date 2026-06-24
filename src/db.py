@@ -15,6 +15,12 @@ def _serialize_row_objects(db_results):
             map["polygon"] = from_wkt(str(map["polygon"]))
         serialized_objects.append(map)
 
+    if len(serialized_objects) == 1:
+        return serialized_objects[0]
+
+    elif len(serialized_objects) == 0:
+        return None
+
     return serialized_objects
 
 def get_turf_objects_from_db(primary_key: int | list[int]) -> list:

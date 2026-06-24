@@ -6,6 +6,7 @@ from shapely import affinity, force_2d, buffer, intersection, difference, minimu
 from shapely.geometry import Polygon, mapping
 from shapely.wkt import loads
 from datetime import datetime
+from src.db import get_turf_objects_from_db
 
 def determine_scale(time: datetime):
     """There's a lot of game logic to still be decided, so a big ol TODO on this one.
@@ -81,29 +82,30 @@ def intersect(existing_gdf: geopandas.geodataframe, new_gdf: geopandas.geodatafr
 
     return new_gdf
 
-def intersect_complex(existing_gdf: geopandas.geodataframe, new_gdf: geopandas.geodataframe):
+def intersect_complex(existing_poly: geopandas.geodataframe, new_poly: geopandas.geodataframe):
     """
     Slightly more complex than above, should really only take two args.  Endgame is to take all relevant
     local polygons as an array and find a mix of conflicted areas instead of just the one, but we'll get there
 
     returns intersection(existing, new) - intersection(inner, new)
     """
-    pgon1 = geopandas.GeoSeries.from_wkt(existing_gdf["polygon"])
-    pgon2 = scale_polygon(existing_gdf, datetime.now())
-    pgon3 = geopandas.GeoSeries.from_wkt(new_gdf["polygon"])
+    existing_pgon = existing_poly["polygon"]
+    scaled_existing_pgon = scale_polygon(existing_poly)
+    new_pgon = new_poly["polygon"]
 
-    all_combined = pgon3.intersection(pgon1)
-    inner_combined = pgon3.intersection(pgon2)
+    all_combined = new_pgon.intersection(existing_pgon)
+    inner_combined = new_pgon.intersection(scaled_existing_pgon)
 
     print(f"find the diff of {all_combined}")
     print(f"and {inner_combined}")
     
     diff = all_combined.difference(inner_combined)
     print(diff)
-    new_gdf = geopandas.GeoDataFrame(geometry=diff)
-    new_gdf.to_file("src/transform_data/inter_polygon_debug.geojson", driver="GeoJSON", index=False)
+    new_gdf = geopandas.GeoDataFrame(geometry=[diff])
+    
+    #new_gdf.to_file("src/transform_data/inter_polygon_debug.geojson", driver="GeoJSON", index=False)
 
-    return None
+    return new_gdf
 
 def cut_turf(new_gdf: int, possible_intersections: list[int]):
     """
@@ -112,4 +114,15 @@ def cut_turf(new_gdf: int, possible_intersections: list[int]):
 
     returns: a list of updated possible intersections that were edited
     """
+
+    new_turf = get_turf_objects_from_db(new_gdf)
+    iterative_fname = "src/cut_data/overlap_"
+
+    for possibility in possible_intersections:
+        existing_turf = get_turf_objects_from_db(possibility)
+        if new_turf["polygon"].overlaps(existing_turf["polygon"]):
+            print(f"Overlap detected between new polygon with ID {new_gdf} and existing polygon {possibility}")
+            diff = intersect_complex(existing_turf, new_turf)
+            diff.to_file(f"{iterative_fname}{possibility}.geojson", driver="GeoJSON", index=False)
+        
     return None
