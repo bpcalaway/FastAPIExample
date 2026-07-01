@@ -71,10 +71,10 @@ async def scale_turf(turf_id: int = None):
     Test endpoint, will eventually not need an api call as it will be determined at capture time
     """
     #returns a list but id is unique so should only be one value
-    turflist = get_turf_objects_from_db(primary_key=turf_id)
+    turf = get_turf_objects_from_db(primary_key=turf_id)
 
     #get first value from turf list
-    turf = turflist[0]
+    turf = turf
     scaled_pgon = scale_polygon(turf)
 
     return {"message": "done"}
