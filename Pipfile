@@ -18,6 +18,6 @@ geodatasets = "*"
 sqlalchemy = "*"
 sqlalchemy_serializer = "*"
 psycopg2-binary = "*"
-cgal = "*"
+compas-cgal = "*"
 
 [dev-packages]
