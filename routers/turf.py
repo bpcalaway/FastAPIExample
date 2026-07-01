@@ -2,7 +2,9 @@ from fastapi import APIRouter, UploadFile
 from models.models import Turf
 from schemas.schemas import TurfSchema
 from sqlalchemy import insert, select
+from datetime import datetime
 import geopandas
+from shapely import from_wkt
 from src.area import scale_polygon, intersect, intersect_complex, create_turf_from_gdf, cut_turf
 from src.sql import sql_engine
 from src.db import get_turf_objects_from_db
@@ -26,7 +28,7 @@ async def list_turfs(turf_id: int = None, user_id: int = None):
     return [dict(r._mapping) for r in turfs]
 
 @router.post("/")
-async def claim_turf(turf: UploadFile, user: int):
+async def claim_turf(turf: UploadFile, user: int, output_to_file=False):
     """
     Upload a geojson file and create a new entry in the Turf table.  We'll need to keep building this,
     as it is one of our biggest pieces of functionality.  For now, pass it a geojson and a user ID, then
@@ -42,6 +44,11 @@ async def claim_turf(turf: UploadFile, user: int):
     with sql_engine.connect() as conn:
         turf_row = conn.execute(insert(Turf).values(**turf_dict))
         conn.commit()
+
+    if output_to_file:
+        fname = f"src/transform_data/{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}.geojson"
+        new_gdf = geopandas.GeoDataFrame(geometry=[from_wkt(turf_dict["polygon"])])
+        new_gdf.to_file(fname, driver="GeoJSON", index=False)
 
     return {"message": "Successfully uploaded turf"}
 

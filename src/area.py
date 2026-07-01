@@ -70,8 +70,8 @@ def intersect(existing_gdf: geopandas.geodataframe, new_gdf: geopandas.geodatafr
     This will eventually get much more complex and involve the intersection of N gdfs, and of their partial decays
     For now, we're hardcoding two and not bothering to decay it.  In short, there's a lot TODO
     """
-    pgon1 = geopandas.GeoSeries.from_wkt(existing_gdf["polygon"])
-    pgon2 = geopandas.GeoSeries.from_wkt(new_gdf["polygon"])
+    pgon1 = existing_gdf["polygon"]
+    pgon2 = new_gdf["polygon"]
 
     inter = intersection(pgon1, pgon2)
     new_gdf = geopandas.GeoDataFrame(geometry=inter)
@@ -122,7 +122,7 @@ def cut_turf(new_gdf: int, possible_intersections: list[int]):
         existing_turf = get_turf_objects_from_db(possibility)
         if new_turf["polygon"].overlaps(existing_turf["polygon"]):
             print(f"Overlap detected between new polygon with ID {new_gdf} and existing polygon {possibility}")
-            diff = intersect_complex(existing_turf, new_turf)
+            diff = intersect(existing_turf, new_turf)
             diff.to_file(f"{iterative_fname}{possibility}.geojson", driver="GeoJSON", index=False)
         
     return None
